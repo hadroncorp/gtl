@@ -14,12 +14,12 @@ func TestList_General(t *testing.T) {
 	ls.PushBack(3)
 	ls.PushBack(5)
 	ls.PushFront(1)
-	ls.Insert(ls.Size()-2, 4)
-	assert.Equal(t, 5, ls.Size())
+	ls.Insert(ls.Len()-2, 4)
+	assert.Equal(t, 5, ls.Len())
 	assert.Equal(t, 1, ls.Front())
 	assert.Equal(t, 5, ls.Back())
 	ls.PopBack()
-	assert.Equal(t, 4, ls.Size())
+	assert.Equal(t, 4, ls.Len())
 	assert.Equal(t, 1, ls.Front())
 	assert.Equal(t, 4, ls.Back())
 	assert.EqualValues(t, []int{1, 2, 3, 4}, ls.Slice())
@@ -33,7 +33,7 @@ func TestList_General(t *testing.T) {
 		count++
 	}
 
-	count = ls.Size() - 1
+	count = ls.Len() - 1
 	for item := range ls.End() {
 		assert.Equal(t, ls.At(count), item)
 		count--

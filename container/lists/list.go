@@ -172,8 +172,8 @@ func (l *List[T]) Remove(pos int) {
 	current.next.prev = current.prev
 }
 
-// Size returns the number of elements in the list.
-func (l *List[T]) Size() int {
+// Len returns the number of elements in the list.
+func (l *List[T]) Len() int {
 	return l.count
 }
 
