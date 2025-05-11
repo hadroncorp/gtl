@@ -1,4 +1,4 @@
-module github.com/hadroncorp/gtl
+module github.com/tesserical/gtl
 
 go 1.23
 

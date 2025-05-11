@@ -3,7 +3,7 @@ package deque_test
 import (
 	"testing"
 
-	"github.com/hadroncorp/gtl/container/deque"
+	"github.com/tesserical/gtl/container/deque"
 )
 
 func TestDeque_General(t *testing.T) {

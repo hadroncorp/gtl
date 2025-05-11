@@ -2,32 +2,42 @@ package lists
 
 import (
 	"iter"
+
+	"github.com/tesserical/gtl/container"
+	"github.com/tesserical/gtl/predicate"
 )
 
-type listNode[T any] struct {
+type doublyLinkedListNode[T any] struct {
 	data T
-	next *listNode[T]
-	prev *listNode[T]
+	next *doublyLinkedListNode[T]
+	prev *doublyLinkedListNode[T]
 }
 
-// List is a doubly linked list implementation.
+// DoublyLinkedList is a doubly linked list implementation.
 // It allows for efficient insertion and removal of elements from both ends.
 // It is not thread-safe and should be used in a single-threaded context.
-type List[T any] struct {
-	head  *listNode[T]
-	tail  *listNode[T]
+type DoublyLinkedList[T any] struct {
+	head  *doublyLinkedListNode[T]
+	tail  *doublyLinkedListNode[T]
 	count int
 }
 
-// NewList creates a new [List] instance.
-func NewList[T any]() *List[T] {
-	return &List[T]{}
+// Compile-time assertion
+var _ List[any] = (*DoublyLinkedList[any])(nil)
+
+// NewList creates a new [DoublyLinkedList] instance.
+func NewList[T any](vals ...T) *DoublyLinkedList[T] {
+	ls := &DoublyLinkedList[T]{}
+	for i := range vals {
+		ls.PushBack(vals[i])
+	}
+	return ls
 }
 
 // PushBack adds an element to the end of the list.
-func (l *List[T]) PushBack(data T) {
+func (l *DoublyLinkedList[T]) PushBack(data T) {
 	l.count++
-	newNode := &listNode[T]{data: data}
+	newNode := &doublyLinkedListNode[T]{data: data}
 	if l.head == nil {
 		l.head = newNode
 		l.tail = newNode
@@ -40,9 +50,9 @@ func (l *List[T]) PushBack(data T) {
 }
 
 // PushFront adds an element to the front of the list.
-func (l *List[T]) PushFront(data T) {
+func (l *DoublyLinkedList[T]) PushFront(data T) {
 	l.count++
-	newNode := &listNode[T]{data: data}
+	newNode := &doublyLinkedListNode[T]{data: data}
 	if l.head == nil {
 		l.head = newNode
 		l.tail = newNode
@@ -55,7 +65,7 @@ func (l *List[T]) PushFront(data T) {
 }
 
 // Insert adds an element at the specified position in the list.
-func (l *List[T]) Insert(pos int, data T) {
+func (l *DoublyLinkedList[T]) Insert(pos int, data T) {
 	if pos < 0 || pos >= l.count {
 		return
 	}
@@ -69,7 +79,7 @@ func (l *List[T]) Insert(pos int, data T) {
 	}
 
 	l.count++
-	newNode := &listNode[T]{data: data}
+	newNode := &doublyLinkedListNode[T]{data: data}
 	current := l.head
 	for i := 0; i < pos; i++ {
 		current = current.next
@@ -81,7 +91,7 @@ func (l *List[T]) Insert(pos int, data T) {
 }
 
 // Front returns the first element of the list.
-func (l *List[T]) Front() T {
+func (l *DoublyLinkedList[T]) Front() T {
 	if l.head == nil {
 		var zeroVal T
 		return zeroVal
@@ -90,7 +100,7 @@ func (l *List[T]) Front() T {
 }
 
 // Back returns the last element of the list.
-func (l *List[T]) Back() T {
+func (l *DoublyLinkedList[T]) Back() T {
 	if l.tail == nil {
 		var zeroVal T
 		return zeroVal
@@ -98,8 +108,7 @@ func (l *List[T]) Back() T {
 	return l.tail.data
 }
 
-// At returns the element at the specified position in the list.
-func (l *List[T]) At(pos int) T {
+func (l *DoublyLinkedList[T]) Get(pos int) T {
 	if pos < 0 || pos >= l.count {
 		var zeroVal T
 		return zeroVal
@@ -112,7 +121,7 @@ func (l *List[T]) At(pos int) T {
 }
 
 // PopBack removes and returns the last element of the list.
-func (l *List[T]) PopBack() T {
+func (l *DoublyLinkedList[T]) PopBack() T {
 	if l.tail == nil {
 		var zeroVal T
 		return zeroVal
@@ -131,7 +140,7 @@ func (l *List[T]) PopBack() T {
 }
 
 // PopFront removes and returns the first element of the list.
-func (l *List[T]) PopFront() T {
+func (l *DoublyLinkedList[T]) PopFront() T {
 	if l.head == nil {
 		var zeroVal T
 		return zeroVal
@@ -149,8 +158,7 @@ func (l *List[T]) PopFront() T {
 	return data
 }
 
-// Remove removes the element at the specified position in the list.
-func (l *List[T]) Remove(pos int) {
+func (l *DoublyLinkedList[T]) Erase(pos int) {
 	if pos < 0 || pos >= l.count {
 		return
 	}
@@ -172,25 +180,15 @@ func (l *List[T]) Remove(pos int) {
 	current.next.prev = current.prev
 }
 
-// Len returns the number of elements in the list.
-func (l *List[T]) Len() int {
-	return l.count
-}
-
-// IsEmpty returns true if the list is empty.
-func (l *List[T]) IsEmpty() bool {
-	return l.count == 0
-}
-
 // Clear removes all elements from the list.
-func (l *List[T]) Clear() {
+func (l *DoublyLinkedList[T]) Clear() {
 	l.head = nil
 	l.tail = nil
 	l.count = 0
 }
 
 // Slice returns a slice containing all elements in the list.
-func (l *List[T]) Slice() []T {
+func (l *DoublyLinkedList[T]) Slice() []T {
 	slice := make([]T, 0, l.count)
 	current := l.head
 	for current != nil {
@@ -201,7 +199,7 @@ func (l *List[T]) Slice() []T {
 }
 
 // Begin returns a sequence that iterates over the list from the head to the tail.
-func (l *List[T]) Begin() iter.Seq[T] {
+func (l *DoublyLinkedList[T]) Begin() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.head
 		for current != nil {
@@ -214,7 +212,7 @@ func (l *List[T]) Begin() iter.Seq[T] {
 }
 
 // End returns a sequence that iterates over the list from the tail to the head.
-func (l *List[T]) End() iter.Seq[T] {
+func (l *DoublyLinkedList[T]) End() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		current := l.tail
 		for current != nil {
@@ -223,5 +221,85 @@ func (l *List[T]) End() iter.Seq[T] {
 			}
 			current = current.prev
 		}
+	}
+}
+
+func (l *DoublyLinkedList[T]) Size() int {
+	return l.count
+}
+
+func (l *DoublyLinkedList[T]) Empty() bool {
+	return l.count == 0
+}
+
+func (l *DoublyLinkedList[T]) Contains(t T, pred predicate.Binary[T]) bool {
+	for item := range l.Begin() {
+		if pred(item, t) {
+			return true
+		}
+	}
+	return false
+}
+
+func (l *DoublyLinkedList[T]) Iterator() iter.Seq[T] {
+	return l.Begin()
+}
+
+func (l *DoublyLinkedList[T]) Add(t T) {
+	l.PushBack(t)
+}
+
+func (l *DoublyLinkedList[T]) AddAll(container container.Container[T]) {
+	for item := range container.Iterator() {
+		l.PushBack(item)
+	}
+}
+
+func (l *DoublyLinkedList[T]) RemoveIf(pred predicate.Unary[T]) {
+	i := 0
+	for item := range l.Begin() {
+		if pred(item) {
+			l.Erase(i)
+			return
+		}
+		i++
+	}
+}
+
+func (l *DoublyLinkedList[T]) Sort(less predicate.Binary[T]) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (l *DoublyLinkedList[T]) Reverse(less predicate.Binary[T]) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (l *DoublyLinkedList[T]) Splice(pos int, other *DoublyLinkedList[T]) {
+	if pos < 0 || pos >= l.count {
+		return
+	}
+
+	if pos == 0 {
+		oldHead := l.head
+		l.head = other.head
+		l.tail.next = oldHead
+		return
+	} else if pos == l.count-1 {
+		l.PushBack(other.Back())
+		return
+	}
+	current := l.head
+	i := 0
+	for current != nil {
+		if i == pos {
+			next := current.next
+			current.next = other.head
+			other.tail = next
+			break
+		}
+		current = current.next
+		i++
 	}
 }
